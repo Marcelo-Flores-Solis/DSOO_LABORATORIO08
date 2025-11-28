@@ -76,12 +76,42 @@ public class CuentaCorriente extends Cuenta {
 @Override
 public boolean transferir(Cuenta cuentaDestino, double monto) {
     // Para transferencias, no permitimos usar sobregiro
+    if (monto <= 0) {
+        System.out.println("Error: El monto debe ser positivo");
+        return false;
+    }
+
+    if (!estaActiva()) {
+        System.out.println("Error: La cuenta no está activa");
+        return false;
+    }
+
+    if (cuentaDestino == null) {
+        System.out.println("Error: Cuenta destino no válida");
+        return false;
+    }
+
     if (monto > saldo) {
-        System.out.println("Error: Saldo insuficiente para transferencia"); // QUITAR EL "x:"
+        System.out.println("Error: Saldo insuficiente para transferencia");
         System.out.println("Saldo disponible (sin sobregiro): $" + saldo);
         return false;
     }
-    return super.transferir(cuentaDestino, monto);
+
+    // Ejecutar transferencia: descontar de esta cuenta y depositar en destino
+    saldo -= monto;
+    registrarMovimiento("TRANSFERENCIA_SALIDA", -monto, "Transferencia a cuenta " + cuentaDestino.getNumeroCuenta());
+
+    boolean depositado = cuentaDestino.depositar(monto);
+    if (depositado) {
+        System.out.println("Transferencia exitosa: -$" + monto + " a cuenta " + cuentaDestino.getNumeroCuenta());
+        return true;
+    } else {
+        // Si no se pudo depositar en destino, revertir
+        saldo += monto;
+        registrarMovimiento("TRANSFERENCIA_FALLIDA", 0, "Rollback por fallo en depósito destino");
+        System.out.println("Error: No se pudo completar la transferencia al depositar en destino");
+        return false;
+    }
 }
     
     @Override

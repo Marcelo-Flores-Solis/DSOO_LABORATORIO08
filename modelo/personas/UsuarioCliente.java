@@ -14,13 +14,13 @@ public class UsuarioCliente extends Usuario {
     @Override
     public void mostrarPermisos() {
         System.out.println("=== PERMISOS DE CLIENTE ===");
-        System.out.println("✓ Consultar saldo de cuentas propias");
-        System.out.println("✓ Realizar depósitos en cuentas propias");
-        System.out.println("✓ Realizar retiros de cuentas propias");
-        System.out.println("✓ Ver movimientos de cuentas propias");
-        System.out.println("✓ Solicitar estados de cuenta");
-        System.out.println("✗ No puede acceder a información de otros clientes");
-        System.out.println("✗ No puede crear/eliminar cuentas");
+        System.out.println(" Consultar saldo de cuentas propias");
+        System.out.println(" Realizar depósitos en cuentas propias");
+        System.out.println(" Realizar retiros de cuentas propias");
+        System.out.println(" Ver movimientos de cuentas propias");
+        System.out.println(" Solicitar estados de cuenta");
+        System.out.println(" No puede acceder a información de otros clientes");
+        System.out.println(" No puede crear/eliminar cuentas");
         System.out.println("===========================");
     }
     

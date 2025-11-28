@@ -265,10 +265,7 @@ public class Main {
         System.out.print("Ingrese monto a depositar: ");
         double monto = leerDouble();
         
-        System.out.print("Ingrese descripción: ");
-        String descripcion = scanner.nextLine();
-        
-        gestorBanco.realizarDeposito(numeroCuenta, monto, descripcion);
+        gestorBanco.realizarDeposito(numeroCuenta, monto, "");
     }
     
     private static void realizarRetiro() {
@@ -362,8 +359,12 @@ public class Main {
                 }
                 break;
             case 3:
-                // Aquí iría la lógica para crear un nuevo cliente
-                System.out.println("Función de crear cliente en desarrollo...");
+                // Llamar al método interactivo para crear un cliente
+                if (gestorBanco.getGestorUsuarios().agregarClienteInteractivo(scanner)) {
+                    System.out.println("Cliente creado correctamente.");
+                } else {
+                    System.out.println("No se pudo crear el cliente.");
+                }
                 break;
         }
     }

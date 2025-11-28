@@ -14,13 +14,13 @@ public class UsuarioEmpleado extends Usuario {
     @Override
     public void mostrarPermisos() {
         System.out.println("=== PERMISOS DE EMPLEADO ===");
-        System.out.println("✓ Crear cuentas bancarias");
-        System.out.println("✓ Atender transacciones de clientes");
-        System.out.println("✓ Consultar información de clientes");
-        System.out.println("✓ Generar reportes básicos");
-        System.out.println("✓ Gestionar solicitudes de clientes");
-        System.out.println("✗ No puede modificar datos de otros empleados");
-        System.out.println("✗ No puede acceder a configuración del sistema");
+        System.out.println(" Crear cuentas bancarias");
+        System.out.println(" Atender transacciones de clientes");
+        System.out.println(" Consultar información de clientes");
+        System.out.println(" Generar reportes básicos");
+        System.out.println(" Gestionar solicitudes de clientes");
+        System.out.println(" No puede modificar datos de otros empleados");
+        System.out.println(" No puede acceder a configuración del sistema");
         System.out.println("============================");
     }
     

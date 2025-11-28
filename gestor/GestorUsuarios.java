@@ -1,6 +1,7 @@
 package gestor;
 
 import modelo.personas.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -18,6 +19,94 @@ public class GestorUsuarios {
         this.empleados = new ArrayList<>();
         this.usuarioActual = null;
         inicializarDatosDemo();
+    }
+
+    // Método interactivo para agregar un cliente por consola
+    public boolean agregarClienteInteractivo(Scanner sc) {
+        if (!tienePermiso("gestionar_clientes")) {
+            System.out.println("Error: No tiene permisos para gestionar clientes");
+            return false;
+        }
+
+        System.out.println("--- Crear nuevo cliente ---");
+        System.out.print("DNI: ");
+        String dni = sc.nextLine().trim();
+
+        System.out.print("Nombre: ");
+        String nombre = sc.nextLine().trim();
+
+        System.out.print("Apellido: ");
+        String apellido = sc.nextLine().trim();
+
+        System.out.print("Email: ");
+        String email = sc.nextLine().trim();
+
+        System.out.print("Teléfono: ");
+        String telefono = sc.nextLine().trim();
+
+        System.out.print("Fecha de nacimiento (YYYY-MM-DD) [enter para hoy]: ");
+        String fechaStr = sc.nextLine().trim();
+        LocalDate fechaNacimiento = LocalDate.now();
+        if (!fechaStr.isEmpty()) {
+            try {
+                fechaNacimiento = LocalDate.parse(fechaStr);
+            } catch (Exception e) {
+                System.out.println("Formato de fecha inválido, usando fecha actual");
+                fechaNacimiento = LocalDate.now();
+            }
+        }
+
+        System.out.print("Dirección: ");
+        String direccion = sc.nextLine().trim();
+
+        System.out.print("ID Cliente (enter para autogenerar): ");
+        String idCliente = sc.nextLine().trim();
+        if (idCliente.isEmpty()) {
+            idCliente = String.format("CLI%03d", clientes.size() + 1);
+            System.out.println("ID generado: " + idCliente);
+        }
+
+        System.out.print("Categoría (VIP/Regular/Nuevo) [Regular]: ");
+        String categoria = sc.nextLine().trim();
+        if (categoria.isEmpty()) categoria = "Regular";
+
+        System.out.print("Límite de crédito (ej: 1000.0) [1000.0]: ");
+        double limiteCredito = 1000.0;
+        String limiteStr = sc.nextLine().trim();
+        if (!limiteStr.isEmpty()) {
+            try {
+                limiteCredito = Double.parseDouble(limiteStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Valor inválido para límite de crédito, usando 1000.0");
+                limiteCredito = 1000.0;
+            }
+        }
+
+        Cliente cliente = new Cliente(dni, nombre, apellido, email, telefono, fechaNacimiento, direccion,
+                                       idCliente, categoria, limiteCredito);
+
+        boolean creado = agregarCliente(cliente);
+
+        if (creado) {
+            System.out.print("¿Desea crear usuario de acceso para este cliente? (s/n): ");
+            String opcion = sc.nextLine().trim().toLowerCase();
+            if (opcion.equals("s") || opcion.equals("si")) {
+                System.out.print("Nombre de usuario (login): ");
+                String nombreUsuario = sc.nextLine().trim();
+                System.out.print("Contraseña: ");
+                String contraseña = sc.nextLine().trim();
+
+                UsuarioCliente nuevoUsuario = new UsuarioCliente(nombreUsuario, contraseña, cliente);
+                boolean usuarioCreado = agregarUsuario(nuevoUsuario);
+                if (usuarioCreado) {
+                    System.out.println("Usuario creado y asociado al cliente: " + nombreUsuario);
+                } else {
+                    System.out.println("No se pudo crear el usuario para el cliente (nombre de usuario posiblemente existente)");
+                }
+            }
+        }
+
+        return creado;
     }
     
     // Getters
@@ -42,9 +131,9 @@ public class GestorUsuarios {
         
         // Crear empleados demo
         Empleado empleado1 = new Empleado("11223344", "Carlos", "López", "carlos@banco.com",
-                                         "911223344", java.time.LocalDate.of(1980, 3, 10),
-                                         "Av. Central 789", "EMP001", "Cajero", "Atención al Cliente", 
-                                         2500.0, "Mañana");
+                         "911223344", java.time.LocalDate.of(1980, 3, 10),
+                         "Av. Central 789", "EMP001", "Cajero", "Atención al Cliente", 
+                         2500.0, "Mañana");
         
         Empleado empleado2 = new Empleado("44332211", "Ana", "Rodríguez", "ana@banco.com",
                                          "944332211", java.time.LocalDate.of(1975, 12, 5),
@@ -286,11 +375,27 @@ public class GestorUsuarios {
         if (usuarioActual instanceof UsuarioAdministrador) {
             return true; // Los administradores tienen todos los permisos
         } else if (usuarioActual instanceof UsuarioEmpleado) {
-            // Definir qué operaciones puede realizar un empleado
+            // Definir qué operaciones puede realizar un empleado (genéricos)
             String[] permisosEmpleado = {"gestionar_clientes", "crear_cuentas", "ver_reportes"};
             for (String permiso : permisosEmpleado) {
                 if (permiso.equals(operacion)) {
                     return true;
+                }
+            }
+
+            // Permisos por cargo: permitir realizar depósitos/retiros/transferencias
+            // solo a empleados de atención al cliente (cajero/atención) o gerentes
+            if ("realizar_depositos".equals(operacion) || "realizar_retiros".equals(operacion) || "realizar_transferencias".equals(operacion)) {
+                UsuarioEmpleado ue = (UsuarioEmpleado) usuarioActual;
+                Empleado emp = ue.getEmpleado();
+                if (emp != null) {
+                    String cargo = emp.getCargo();
+                    if (cargo != null) {
+                        String cargoLower = cargo.toLowerCase();
+                        if (cargoLower.contains("cajero") || cargoLower.contains("atencion") || emp.esGerente()) {
+                            return true;
+                        }
+                    }
                 }
             }
         } else if (usuarioActual instanceof UsuarioCliente) {
