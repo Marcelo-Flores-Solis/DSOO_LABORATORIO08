@@ -1,11 +1,10 @@
 package gestor;
 
 import modelo.cuentas.*;
-import modelo.transacciones.*;  // Esta importa todas las clases de transacciones
+import modelo.transacciones.*;
 import modelo.personas.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 public class GestorBanco {
     private GestorUsuarios gestorUsuarios;
     private List<Cuenta> cuentas;

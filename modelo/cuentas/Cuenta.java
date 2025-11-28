@@ -10,7 +10,7 @@ public abstract class Cuenta {
     protected double saldo;
     protected Cliente cliente;
     protected LocalDateTime fechaApertura;
-    protected String estado; // ACTIVA, INACTIVA, BLOQUEADA, etc.
+    protected String estado;
     protected List<String> movimientos;
     
     // Constantes para estados

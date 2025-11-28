@@ -1,11 +1,8 @@
 package modelo.personas;
-
-public class UsuarioAdministrador extends Usuario {
-    
+public class UsuarioAdministrador extends Usuario { 
     public UsuarioAdministrador(String nombreUsuario, String contraseña) {
         super(nombreUsuario, contraseña, null);
     }
-    
     @Override
     public void mostrarPermisos() {
         System.out.println("=== PERMISOS DE ADMINISTRADOR ===");
@@ -18,19 +15,14 @@ public class UsuarioAdministrador extends Usuario {
         System.out.println(" Backup y restauración de datos");
         System.out.println("================================");
     }
-    
     @Override
     public void mostrarMenu() {
-        // Este método se implementará luego con Scanner
         System.out.println("Mostrando menú específico para ADMINISTRADOR...");
         mostrarPermisos();
     }
-    
-    // Métodos específicos del administrador
     public void realizarAuditoria() {
         System.out.println("Realizando auditoría del sistema...");
     }
-    
     public void generarReporteCompleto() {
         System.out.println("Generando reporte completo del sistema...");
     }

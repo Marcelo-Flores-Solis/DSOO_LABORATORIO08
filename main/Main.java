@@ -2,8 +2,6 @@ package main;
 
 import gestor.GestorBanco;
 import modelo.personas.*;
-import modelo.cuentas.*;
-import modelo.transacciones.*;
 import java.util.Scanner;
 
 public class Main {
@@ -424,13 +422,13 @@ public class Main {
         int opcion = leerEntero();
         switch (opcion) {
             case 1:
-                realizarDeposito(); // Reutilizar método de cliente
+                realizarDeposito();
                 break;
             case 2:
-                realizarRetiro(); // Reutilizar método de cliente
+                realizarRetiro();
                 break;
             case 3:
-                realizarTransferencia(); // Reutilizar método de cliente
+                realizarTransferencia();
                 break;
         }
     }
@@ -587,7 +585,6 @@ public class Main {
     private static void mostrarTodosLosPermisos() {
         System.out.println("\n=== PERMISOS POR TIPO DE USUARIO ===");
         
-        // Crear usuarios demo para mostrar permisos
         UsuarioCliente clienteDemo = new UsuarioCliente("demo", "demo", null);
         UsuarioEmpleado empleadoDemo = new UsuarioEmpleado("demo", "demo", null);
         UsuarioAdministrador adminDemo = new UsuarioAdministrador("demo", "demo");

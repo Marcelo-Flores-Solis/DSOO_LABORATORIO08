@@ -1,16 +1,11 @@
 package modelo.personas;
-
 public class UsuarioEmpleado extends Usuario {
     private Empleado empleado;
-    
     public UsuarioEmpleado(String nombreUsuario, String contraseña, Empleado empleado) {
         super(nombreUsuario, contraseña, empleado);
         this.empleado = empleado;
     }
-    
-    // Getter específico
     public Empleado getEmpleado() { return empleado; }
-    
     @Override
     public void mostrarPermisos() {
         System.out.println("=== PERMISOS DE EMPLEADO ===");
@@ -23,24 +18,19 @@ public class UsuarioEmpleado extends Usuario {
         System.out.println(" No puede acceder a configuración del sistema");
         System.out.println("============================");
     }
-    
     @Override
     public void mostrarMenu() {
-        // Este método se implementará luego con Scanner
         System.out.println("Mostrando menú específico para EMPLEADO...");
         mostrarPermisos();
         if (empleado != null) {
             empleado.mostrarInformacion();
         }
     }
-    
-    // Métodos específicos del usuario empleado
     public void consultarInformacionEmpleado() {
         if (empleado != null) {
             empleado.mostrarInformacion();
         }
     }
-    
     public boolean puedeGestionarClientes() {
         return empleado != null && 
                (empleado.getCargo().toLowerCase().contains("cajero") ||

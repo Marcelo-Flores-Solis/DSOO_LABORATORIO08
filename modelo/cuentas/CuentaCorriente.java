@@ -5,8 +5,7 @@ import modelo.personas.Cliente;
 public class CuentaCorriente extends Cuenta {
     private double sobregiroMaximo;
     private double sobregiroUtilizado;
-    private double comisionManejo; // Comisión mensual
-    
+    private double comisionManejo;
     // Constructor
     public CuentaCorriente(String numeroCuenta, double saldoInicial, Cliente cliente,
                           double sobregiroMaximo, double comisionManejo) {
@@ -15,38 +14,30 @@ public class CuentaCorriente extends Cuenta {
         this.sobregiroUtilizado = 0.0;
         this.comisionManejo = comisionManejo;
     }
-    
     // Constructor simplificado
     public CuentaCorriente(String numeroCuenta, double saldoInicial, Cliente cliente) {
         this(numeroCuenta, saldoInicial, cliente, 500.0, 10.0);
     }
-    
     // Getters y Setters específicos
     public double getSobregiroMaximo() { return sobregiroMaximo; }
     public void setSobregiroMaximo(double sobregiroMaximo) { 
         this.sobregiroMaximo = sobregiroMaximo; 
     }
-    
     public double getSobregiroUtilizado() { return sobregiroUtilizado; }
-    
     public double getComisionManejo() { return comisionManejo; }
     public void setComisionManejo(double comisionManejo) { 
         this.comisionManejo = comisionManejo; 
     }
-    
-    // Implementación de métodos abstractos
     @Override
     public boolean retirar(double monto) {
         if (monto <= 0) {
             System.out.println("Error: El monto debe ser positivo");
             return false;
         }
-        
         if (!estaActiva()) {
             System.out.println("Error: La cuenta no está activa");
             return false;
         }
-        
         double disponibleTotal = saldo + (sobregiroMaximo - sobregiroUtilizado);
         
         if (monto > disponibleTotal) {
@@ -54,8 +45,6 @@ public class CuentaCorriente extends Cuenta {
             System.out.println("Disponible: $" + disponibleTotal);
             return false;
         }
-        
-        // Calcular cuánto del retiro usa el sobregiro
         if (monto > saldo) {
             double excedente = monto - saldo;
             sobregiroUtilizado += excedente;
@@ -63,60 +52,49 @@ public class CuentaCorriente extends Cuenta {
         } else {
             saldo -= monto;
         }
-        
         registrarMovimiento("RETIRO", -monto, "Retiro de efectivo" + 
                           (sobregiroUtilizado > 0 ? " (Con sobregiro)" : ""));
-        
         System.out.println("Retiro exitoso: -$" + monto + 
                          (sobregiroUtilizado > 0 ? " (Sobregiro utilizado: $" + sobregiroUtilizado + ")" : "") +
                          " | Saldo disponible: $" + (saldo + (sobregiroMaximo - sobregiroUtilizado)));
         return true;
     }
-    
-@Override
-public boolean transferir(Cuenta cuentaDestino, double monto) {
-    // Para transferencias, no permitimos usar sobregiro
-    if (monto <= 0) {
-        System.out.println("Error: El monto debe ser positivo");
-        return false;
-    }
+    @Override
+    public boolean transferir(Cuenta cuentaDestino, double monto) {
+        // Para transferencias, no permitimos usar sobregiro
+        if (monto <= 0) {
+            System.out.println("Error: El monto debe ser positivo");
+            return false;
+        }
+        if (!estaActiva()) {
+            System.out.println("Error: La cuenta no está activa");
+            return false;
+        }
+        if (cuentaDestino == null) {
+            System.out.println("Error: Cuenta destino no válida");
+            return false;
+        }
+        if (monto > saldo) {
+            System.out.println("Error: Saldo insuficiente para transferencia");
+            System.out.println("Saldo disponible (sin sobregiro): $" + saldo);
+            return false;
+        }
+        saldo -= monto;
+        registrarMovimiento("TRANSFERENCIA_SALIDA", -monto, "Transferencia a cuenta " + cuentaDestino.getNumeroCuenta());
 
-    if (!estaActiva()) {
-        System.out.println("Error: La cuenta no está activa");
-        return false;
+        boolean depositado = cuentaDestino.depositar(monto);
+        if (depositado) {
+            System.out.println("Transferencia exitosa: -$" + monto + " a cuenta " + cuentaDestino.getNumeroCuenta());
+            return true;
+        } else {
+            saldo += monto;
+            registrarMovimiento("TRANSFERENCIA_FALLIDA", 0, "Rollback por fallo en depósito destino");
+            System.out.println("Error: No se pudo completar la transferencia al depositar en destino");
+            return false;
+        }
     }
-
-    if (cuentaDestino == null) {
-        System.out.println("Error: Cuenta destino no válida");
-        return false;
-    }
-
-    if (monto > saldo) {
-        System.out.println("Error: Saldo insuficiente para transferencia");
-        System.out.println("Saldo disponible (sin sobregiro): $" + saldo);
-        return false;
-    }
-
-    // Ejecutar transferencia: descontar de esta cuenta y depositar en destino
-    saldo -= monto;
-    registrarMovimiento("TRANSFERENCIA_SALIDA", -monto, "Transferencia a cuenta " + cuentaDestino.getNumeroCuenta());
-
-    boolean depositado = cuentaDestino.depositar(monto);
-    if (depositado) {
-        System.out.println("Transferencia exitosa: -$" + monto + " a cuenta " + cuentaDestino.getNumeroCuenta());
-        return true;
-    } else {
-        // Si no se pudo depositar en destino, revertir
-        saldo += monto;
-        registrarMovimiento("TRANSFERENCIA_FALLIDA", 0, "Rollback por fallo en depósito destino");
-        System.out.println("Error: No se pudo completar la transferencia al depositar en destino");
-        return false;
-    }
-}
-    
     @Override
     public boolean depositar(double monto) {
-        // Primero cubrir el sobregiro si existe
         if (sobregiroUtilizado > 0) {
             if (monto <= sobregiroUtilizado) {
                 sobregiroUtilizado -= monto;
@@ -135,11 +113,8 @@ public boolean transferir(Cuenta cuentaDestino, double monto) {
                 return true;
             }
         }
-        
         return super.depositar(monto);
     }
-    
-    // Métodos específicos de cuenta corriente
     public void aplicarComisionManejo() {
         if (saldo >= comisionManejo) {
             saldo -= comisionManejo;
@@ -149,27 +124,22 @@ public boolean transferir(Cuenta cuentaDestino, double monto) {
             System.out.println("No se pudo aplicar comisión: saldo insuficiente");
         }
     }
-    
     public double getSaldoDisponible() {
         return saldo + (sobregiroMaximo - sobregiroUtilizado);
     }
-    
     public double getLineaSobregiroDisponible() {
         return sobregiroMaximo - sobregiroUtilizado;
     }
-    
     public void reducirSobregiro(double monto) {
         if (monto <= 0 || monto > sobregiroUtilizado) {
             System.out.println("Error: Monto no válido para reducir sobregiro");
             return;
-        }
-        
+        } 
         sobregiroUtilizado -= monto;
         registrarMovimiento("REDUCCION_SOBREGIRO", monto, "Reducción de sobregiro");
         System.out.println("Sobregiro reducido en: $" + monto + 
                          " | Sobregiro actual: $" + sobregiroUtilizado);
     }
-    
     @Override
     public void generarResumen() {
         super.generarResumen();
