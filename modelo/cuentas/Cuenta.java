@@ -94,7 +94,7 @@ public abstract class Cuenta {
     }
     
     // Métodos de movimientos
-    protected void registrarMovimiento(String tipo, double monto, String descripcion) {
+    public void registrarMovimiento(String tipo, double monto, String descripcion) {
         String movimiento = String.format("[%s] %s: $%.2f - %s | Saldo: $%.2f",
                 LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
                 tipo, monto, descripcion, saldo);

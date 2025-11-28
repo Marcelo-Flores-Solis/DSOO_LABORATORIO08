@@ -73,17 +73,16 @@ public class CuentaCorriente extends Cuenta {
         return true;
     }
     
-    @Override
-    public boolean transferir(Cuenta cuentaDestino, double monto) {
-        // Para transferencias, no permitimos usar sobregiro
-        if (monto > saldo) {
-            System.out.println("Error: Saldo insuficiente para transferencia");
-            System.out.println("Saldo disponible (sin sobregiro): $" + saldo);
-            return false;
-        }
-        
-        return super.transferir(cuentaDestino, monto);
+@Override
+public boolean transferir(Cuenta cuentaDestino, double monto) {
+    // Para transferencias, no permitimos usar sobregiro
+    if (monto > saldo) {
+        System.out.println("Error: Saldo insuficiente para transferencia"); // QUITAR EL "x:"
+        System.out.println("Saldo disponible (sin sobregiro): $" + saldo);
+        return false;
     }
+    return super.transferir(cuentaDestino, monto);
+}
     
     @Override
     public boolean depositar(double monto) {

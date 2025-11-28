@@ -1,4 +1,5 @@
 package main;
+
 import gestor.GestorBanco;
 import modelo.personas.*;
 import modelo.cuentas.*;
@@ -14,7 +15,7 @@ public class Main {
         scanner = new Scanner(System.in);
         
         System.out.println("==========================================");
-        System.out.println("    SISTEMA BANCARIO - LABORATORIO 07");
+        System.out.println("    SISTEMA BANCARIO - LABORATORIO 08");
         System.out.println("==========================================");
         
         mostrarMenuPrincipal();
@@ -23,38 +24,42 @@ public class Main {
         System.out.println("¡Gracias por usar el Sistema Bancario!");
     }
     
-    // Menú principal del sistema
+    // Menú principal con opciones de tipo de usuario
     private static void mostrarMenuPrincipal() {
         int opcion;
         
         do {
             System.out.println("\n=== MENÚ PRINCIPAL ===");
-            System.out.println("1. Ingresar al Sistema");
-            System.out.println("2. Ver Información del Sistema");
-            System.out.println("3. Salir");
+            System.out.println("1. Ingresar como Cliente");
+            System.out.println("2. Ingresar como Empleado");
+            System.out.println("3. Ingresar como Administrador");
+            System.out.println("4. Salir del Sistema");
             System.out.print("Seleccione una opción: ");
             
             opcion = leerEntero();
             
             switch (opcion) {
                 case 1:
-                    procesoAutenticacion();
+                    procesoAutenticacion("CLIENTE");
                     break;
                 case 2:
-                    mostrarInformacionSistema();
+                    procesoAutenticacion("EMPLEADO");
                     break;
                 case 3:
+                    procesoAutenticacion("ADMINISTRADOR");
+                    break;
+                case 4:
                     System.out.println("Saliendo del sistema...");
                     break;
                 default:
                     System.out.println("Opción no válida. Intente nuevamente.");
             }
-        } while (opcion != 3);
+        } while (opcion != 4);
     }
     
-    // Proceso de autenticación
-    private static void procesoAutenticacion() {
-        System.out.println("\n=== INICIO DE SESIÓN ===");
+    // Proceso de autenticación específico por tipo de usuario
+    private static void procesoAutenticacion(String tipoUsuario) {
+        System.out.println("\n=== INICIO DE SESIÓN - " + tipoUsuario + " ===");
         
         System.out.print("Nombre de usuario: ");
         String usuario = scanner.nextLine();
@@ -65,16 +70,23 @@ public class Main {
         boolean autenticado = gestorBanco.getGestorUsuarios().autenticarUsuario(usuario, contraseña);
         
         if (autenticado) {
-            String tipoUsuario = gestorBanco.getGestorUsuarios().getTipoUsuarioActual();
-            System.out.println("\n¡Autenticación exitosa! Tipo de usuario: " + tipoUsuario);
-            mostrarMenuPorTipoUsuario(tipoUsuario);
+            // Verificar que el tipo de usuario coincida
+            String tipoUsuarioActual = gestorBanco.getGestorUsuarios().getTipoUsuarioActual();
+            if (tipoUsuarioActual.equals(tipoUsuario)) {
+                System.out.println("\n¡Autenticación exitosa! Bienvenido " + usuario);
+                mostrarMenuEspecifico(tipoUsuario);
+            } else {
+                System.out.println("Error: No tiene permisos para ingresar como " + tipoUsuario);
+                System.out.println("Su tipo de usuario es: " + tipoUsuarioActual);
+                gestorBanco.getGestorUsuarios().cerrarSesion();
+            }
         } else {
-            System.out.println("Error en la autenticación. Intente nuevamente.");
+            System.out.println("Error en la autenticación. Usuario o contraseña incorrectos.");
         }
     }
     
-    // Menús específicos por tipo de usuario
-    private static void mostrarMenuPorTipoUsuario(String tipoUsuario) {
+    // Mostrar menú específico según el tipo de usuario
+    private static void mostrarMenuEspecifico(String tipoUsuario) {
         switch (tipoUsuario) {
             case "CLIENTE":
                 mostrarMenuCliente();
@@ -85,12 +97,10 @@ public class Main {
             case "ADMINISTRADOR":
                 mostrarMenuAdministrador();
                 break;
-            default:
-                System.out.println("Tipo de usuario no reconocido.");
         }
     }
     
-    // Menú para Clientes
+    // ========== MENÚ CLIENTE ==========
     private static void mostrarMenuCliente() {
         int opcion;
         
@@ -100,10 +110,10 @@ public class Main {
             System.out.println("2. Realizar Depósito");
             System.out.println("3. Realizar Retiro");
             System.out.println("4. Realizar Transferencia");
-            System.out.println("5. Ver Movimientos");
+            System.out.println("5. Ver Movimientos de Cuenta");
             System.out.println("6. Ver Mis Cuentas");
             System.out.println("7. Ver Mis Permisos");
-            System.out.println("8. Ver Mi Información");
+            System.out.println("8. Ver Mi Información Personal");
             System.out.println("0. Cerrar Sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -111,32 +121,32 @@ public class Main {
             
             switch (opcion) {
                 case 1:
-                    consultarSaldoCliente();
+                    consultarSaldo();
                     break;
                 case 2:
-                    realizarDepositoCliente();
+                    realizarDeposito();
                     break;
                 case 3:
-                    realizarRetiroCliente();
+                    realizarRetiro();
                     break;
                 case 4:
-                    realizarTransferenciaCliente();
+                    realizarTransferencia();
                     break;
                 case 5:
-                    verMovimientosCliente();
+                    verMovimientos();
                     break;
                 case 6:
-                    verCuentasCliente();
+                    verMisCuentas();
                     break;
                 case 7:
                     mostrarPermisosCliente();
                     break;
                 case 8:
-                    mostrarInformacionCliente();
+                    mostrarInformacionPersonal();
                     break;
                 case 0:
                     gestorBanco.getGestorUsuarios().cerrarSesion();
-                    System.out.println("Sesión cerrada exitosamente.");
+                    System.out.println("Sesión de cliente cerrada exitosamente.");
                     break;
                 default:
                     System.out.println("Opción no válida. Intente nuevamente.");
@@ -144,7 +154,7 @@ public class Main {
         } while (opcion != 0);
     }
     
-    // Menú para Empleados
+    // ========== MENÚ EMPLEADO ==========
     private static void mostrarMenuEmpleado() {
         int opcion;
         
@@ -153,8 +163,8 @@ public class Main {
             System.out.println("1. Gestión de Clientes");
             System.out.println("2. Gestión de Cuentas");
             System.out.println("3. Procesar Transacciones");
-            System.out.println("4. Consultar Información");
-            System.out.println("5. Ver Reportes");
+            System.out.println("4. Consultas del Sistema");
+            System.out.println("5. Reportes y Estadísticas");
             System.out.println("6. Ver Mis Permisos");
             System.out.println("7. Ver Mi Información");
             System.out.println("0. Cerrar Sesión");
@@ -186,7 +196,7 @@ public class Main {
                     break;
                 case 0:
                     gestorBanco.getGestorUsuarios().cerrarSesion();
-                    System.out.println("Sesión cerrada exitosamente.");
+                    System.out.println("Sesión de empleado cerrada exitosamente.");
                     break;
                 default:
                     System.out.println("Opción no válida. Intente nuevamente.");
@@ -194,7 +204,7 @@ public class Main {
         } while (opcion != 0);
     }
     
-    // Menú para Administradores
+    // ========== MENÚ ADMINISTRADOR ==========
     private static void mostrarMenuAdministrador() {
         int opcion;
         
@@ -232,7 +242,7 @@ public class Main {
                     break;
                 case 0:
                     gestorBanco.getGestorUsuarios().cerrarSesion();
-                    System.out.println("Sesión cerrada exitosamente.");
+                    System.out.println("Sesión de administrador cerrada exitosamente.");
                     break;
                 default:
                     System.out.println("Opción no válida. Intente nuevamente.");
@@ -242,13 +252,13 @@ public class Main {
     
     // ========== MÉTODOS PARA CLIENTES ==========
     
-    private static void consultarSaldoCliente() {
+    private static void consultarSaldo() {
         System.out.print("Ingrese número de cuenta: ");
         String numeroCuenta = scanner.nextLine();
         gestorBanco.consultarSaldo(numeroCuenta);
     }
     
-    private static void realizarDepositoCliente() {
+    private static void realizarDeposito() {
         System.out.print("Ingrese número de cuenta: ");
         String numeroCuenta = scanner.nextLine();
         
@@ -261,7 +271,7 @@ public class Main {
         gestorBanco.realizarDeposito(numeroCuenta, monto, descripcion);
     }
     
-    private static void realizarRetiroCliente() {
+    private static void realizarRetiro() {
         System.out.print("Ingrese número de cuenta: ");
         String numeroCuenta = scanner.nextLine();
         
@@ -277,7 +287,7 @@ public class Main {
         gestorBanco.realizarRetiro(numeroCuenta, monto, metodo, ubicacion);
     }
     
-    private static void realizarTransferenciaCliente() {
+    private static void realizarTransferencia() {
         System.out.print("Ingrese cuenta origen: ");
         String cuentaOrigen = scanner.nextLine();
         
@@ -296,14 +306,13 @@ public class Main {
         gestorBanco.realizarTransferencia(cuentaOrigen, cuentaDestino, monto, concepto, referencia);
     }
     
-    private static void verMovimientosCliente() {
+    private static void verMovimientos() {
         System.out.print("Ingrese número de cuenta: ");
         String numeroCuenta = scanner.nextLine();
         gestorBanco.consultarMovimientos(numeroCuenta);
     }
     
-    private static void verCuentasCliente() {
-        // Obtener el cliente actual
+    private static void verMisCuentas() {
         Usuario usuarioActual = gestorBanco.getGestorUsuarios().getUsuarioActual();
         if (usuarioActual instanceof UsuarioCliente) {
             UsuarioCliente usuarioCliente = (UsuarioCliente) usuarioActual;
@@ -318,7 +327,7 @@ public class Main {
         }
     }
     
-    private static void mostrarInformacionCliente() {
+    private static void mostrarInformacionPersonal() {
         Usuario usuarioActual = gestorBanco.getGestorUsuarios().getUsuarioActual();
         if (usuarioActual != null) {
             usuarioActual.mostrarInformacionUsuario();
@@ -353,8 +362,8 @@ public class Main {
                 }
                 break;
             case 3:
-                // Implementar creación de cliente
-                System.out.println("Función en desarrollo...");
+                // Aquí iría la lógica para crear un nuevo cliente
+                System.out.println("Función de crear cliente en desarrollo...");
                 break;
         }
     }
@@ -387,8 +396,19 @@ public class Main {
                 }
                 break;
             case 3:
-                // Similar a cuenta de ahorros
-                System.out.println("Función en desarrollo...");
+                System.out.print("Número de cuenta: ");
+                String numCorriente = scanner.nextLine();
+                System.out.print("DNI del cliente: ");
+                String dniCliente = scanner.nextLine();
+                System.out.print("Saldo inicial: ");
+                double saldoInicial = leerDouble();
+                
+                Cliente clienteCorriente = gestorBanco.getGestorUsuarios().buscarCliente(dniCliente);
+                if (clienteCorriente != null) {
+                    gestorBanco.crearCuentaCorriente(numCorriente, saldoInicial, clienteCorriente);
+                } else {
+                    System.out.println("Cliente no encontrado.");
+                }
                 break;
         }
     }
@@ -401,8 +421,17 @@ public class Main {
         System.out.print("Seleccione opción: ");
         
         int opcion = leerEntero();
-        // Implementación similar a los métodos de cliente pero con validaciones de empleado
-        System.out.println("Función en desarrollo...");
+        switch (opcion) {
+            case 1:
+                realizarDeposito(); // Reutilizar método de cliente
+                break;
+            case 2:
+                realizarRetiro(); // Reutilizar método de cliente
+                break;
+            case 3:
+                realizarTransferencia(); // Reutilizar método de cliente
+                break;
+        }
     }
     
     private static void mostrarSubMenuConsultas() {
@@ -415,10 +444,10 @@ public class Main {
         int opcion = leerEntero();
         switch (opcion) {
             case 1:
-                consultarSaldoCliente(); // Reutilizar método
+                consultarSaldo();
                 break;
             case 2:
-                verMovimientosCliente(); // Reutilizar método
+                verMovimientos();
                 break;
             case 3:
                 System.out.print("Número de transacciones a mostrar: ");
@@ -456,8 +485,9 @@ public class Main {
     private static void mostrarSubMenuGestionUsuarios() {
         System.out.println("\n--- Gestión de Usuarios ---");
         System.out.println("1. Ver todos los usuarios");
-        System.out.println("2. Activar/Desactivar usuario");
-        System.out.println("3. Eliminar usuario");
+        System.out.println("2. Activar usuario");
+        System.out.println("3. Desactivar usuario");
+        System.out.println("4. Eliminar usuario");
         System.out.print("Seleccione opción: ");
         
         int opcion = leerEntero();
@@ -466,20 +496,19 @@ public class Main {
                 gestorBanco.getGestorUsuarios().mostrarTodosLosUsuarios();
                 break;
             case 2:
-                System.out.print("Nombre de usuario: ");
-                String username = scanner.nextLine();
-                System.out.print("¿Activar (A) o Desactivar (D)? ");
-                String accion = scanner.nextLine();
-                if (accion.equalsIgnoreCase("A")) {
-                    gestorBanco.getGestorUsuarios().activarUsuario(username);
-                } else if (accion.equalsIgnoreCase("D")) {
-                    gestorBanco.getGestorUsuarios().desactivarUsuario(username);
-                }
+                System.out.print("Nombre de usuario a activar: ");
+                String userActivar = scanner.nextLine();
+                gestorBanco.getGestorUsuarios().activarUsuario(userActivar);
                 break;
             case 3:
+                System.out.print("Nombre de usuario a desactivar: ");
+                String userDesactivar = scanner.nextLine();
+                gestorBanco.getGestorUsuarios().desactivarUsuario(userDesactivar);
+                break;
+            case 4:
                 System.out.print("Nombre de usuario a eliminar: ");
-                String userToDelete = scanner.nextLine();
-                gestorBanco.getGestorUsuarios().eliminarUsuario(userToDelete);
+                String userEliminar = scanner.nextLine();
+                gestorBanco.getGestorUsuarios().eliminarUsuario(userEliminar);
                 break;
         }
     }
@@ -487,8 +516,7 @@ public class Main {
     private static void mostrarSubMenuGestionEmpleados() {
         System.out.println("\n--- Gestión de Empleados ---");
         System.out.println("1. Ver todos los empleados");
-        System.out.println("2. Agregar nuevo empleado");
-        System.out.println("3. Buscar empleado por DNI");
+        System.out.println("2. Buscar empleado por DNI");
         System.out.print("Seleccione opción: ");
         
         int opcion = leerEntero();
@@ -497,10 +525,6 @@ public class Main {
                 gestorBanco.getGestorUsuarios().mostrarTodosLosEmpleados();
                 break;
             case 2:
-                // Implementar creación de empleado
-                System.out.println("Función en desarrollo...");
-                break;
-            case 3:
                 System.out.print("Ingrese DNI: ");
                 String dni = scanner.nextLine();
                 Empleado empleado = gestorBanco.getGestorUsuarios().buscarEmpleado(dni);
@@ -516,7 +540,7 @@ public class Main {
     private static void mostrarSubMenuGestionCompleta() {
         System.out.println("\n--- Gestión Completa del Sistema ---");
         System.out.println("1. Ver estadísticas completas");
-        System.out.println("2. Gestionar todas las cuentas");
+        System.out.println("2. Ver todas las cuentas");
         System.out.println("3. Ver todas las transacciones");
         System.out.print("Seleccione opción: ");
         
@@ -575,24 +599,6 @@ public class Main {
         
         System.out.println("\n--- PERMISOS DE ADMINISTRADOR ---");
         adminDemo.mostrarPermisos();
-    }
-    
-    // ========== MÉTODOS GENERALES ==========
-    
-    private static void mostrarInformacionSistema() {
-        System.out.println("\n=== INFORMACIÓN DEL SISTEMA ===");
-        System.out.println("Sistema Bancario - Laboratorio 07");
-        System.out.println("Desarrollo de Software Orientado a Objetos");
-        System.out.println("Usuarios de demostración:");
-        System.out.println("  Cliente: usuario='cliente1', contraseña='123'");
-        System.out.println("  Empleado: usuario='empleado1', contraseña='789'");
-        System.out.println("  Administrador: usuario='admin', contraseña='admin'");
-        System.out.println("\nCaracterísticas implementadas:");
-        System.out.println("  ✓ Sistema de autenticación por roles");
-        System.out.println("  ✓ Gestión de usuarios y permisos");
-        System.out.println("  ✓ Cuentas de ahorro y corriente");
-        System.out.println("  ✓ Transacciones (depósitos, retiros, transferencias)");
-        System.out.println("  ✓ Control de acceso y validaciones");
     }
     
     // ========== MÉTODOS DE UTILIDAD ==========
